@@ -1,3 +1,10 @@
+## 1.0.0 (2026-10-11)
+
+### ✨ New Features
+
+* add configurable CHZZK chat and live player patches ([acb7e59](https://github.com/renovate-bot/snowyegret23-_-morphe-patches/commit/acb7e595e908518aa06aa677523d29419a9c6bee))
+* support CHZZK 3.14.10 alongside 3.14.0 ([d723cb7](https://github.com/renovate-bot/snowyegret23-_-morphe-patches/commit/d723cb7692fb1396afc0693ac94cf711cb4c201c))
+
 ## 1.2.0 (2026-10-12)
 
 ### 지원 버전 추가
