@@ -1,3 +1,9 @@
+## [1.4.0](https://github.com/snowyegret23/morphe-patches/compare/v1.3.0...v1.4.0) (2026-10-14)
+
+### ✨ New Features
+
+* **minor:** improve live catch-up and add buffer controls ([d3a142a](https://github.com/snowyegret23/morphe-patches/commit/d3a142ad15387e08d96f0c5ded48175e770977fc))
+
 ## 1.3.0 (2026-10-14)
 
 ### 새 기능과 개선
