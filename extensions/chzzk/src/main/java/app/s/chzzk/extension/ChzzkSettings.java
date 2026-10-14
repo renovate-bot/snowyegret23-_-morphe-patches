@@ -364,8 +364,10 @@ public final class ChzzkSettings {
         row.setPadding(0, dp(context, 16), 0, dp(context, 4));
         row.addView(text(context, title, 14, TEXT), new LinearLayout.LayoutParams(0, -2, 1));
         int current = number(key, fallback);
-        boolean stepped = "chat_width_scale".equals(key) || "font_scale".equals(key) || "audio_volume".equals(key);
-        TextView value = text(context, current + unit + (stepped && current == 100 ? " · 기본" : ""), 13, GREEN);
+        boolean seconds = "live_catch_up_buffer_seconds".equals(key);
+        boolean stepped = seconds || "chat_width_scale".equals(key) || "font_scale".equals(key) || "audio_volume".equals(key);
+        int stepSize = seconds ? 1 : 5;
+        TextView value = text(context, current + unit + (stepped && current == fallback ? " · 기본" : ""), 13, GREEN);
         value.setTypeface(null, Typeface.BOLD);
         row.addView(value);
         panel.addView(row);
@@ -380,16 +382,16 @@ public final class ChzzkSettings {
         if (stepped) {
             value.setGravity(Gravity.CENTER);
             value.setMinWidth(dp(context, 96));
-            for (int delta : new int[] {-5, 5}) {
+            for (int delta : new int[] {-stepSize, stepSize}) {
                 TextView step = text(context, delta < 0 ? "−" : "+", 24, GREEN);
                 step.setGravity(Gravity.CENTER);
-                step.setContentDescription(title + (delta < 0 ? " 5% 줄이기" : " 5% 늘리기"));
+                step.setContentDescription(title + " " + stepSize + unit + (delta < 0 ? " 줄이기" : " 늘리기"));
                 row.addView(step, delta < 0 ? 1 : row.getChildCount(),
                     new LinearLayout.LayoutParams(dp(context, 40), dp(context, 40)));
                 step.setOnClickListener(view -> {
                     int next = Math.max(min, Math.min(max, number(key, fallback) + delta));
                     seek.setProgress(next - min);
-                    value.setText(next + unit + (next == 100 ? " · 기본" : ""));
+                    value.setText(next + unit + (next == fallback ? " · 기본" : ""));
                     setNumber(key, next);
                 });
             }
@@ -398,7 +400,7 @@ public final class ChzzkSettings {
             public void onProgressChanged(SeekBar bar, int progress, boolean fromUser) {
                 if (!fromUser) return;
                 int next = progress + min;
-                value.setText(next + unit + (stepped && next == 100 ? " · 기본" : ""));
+                value.setText(next + unit + (stepped && next == fallback ? " · 기본" : ""));
                 setNumber(key, next);
             }
             public void onStartTrackingTouch(SeekBar bar) {}
@@ -667,6 +669,7 @@ public final class ChzzkSettings {
             case "timestamp_format": return new int[] {0, 3};
             case "audio_compression_strength": return new int[] {0, 2};
             case "audio_volume": return new int[] {100, 300};
+            case "live_catch_up_buffer_seconds": return new int[] {1, 10};
             case "timestamp_size": return new int[] {60, 100};
             default: return null;
         }
@@ -845,7 +848,8 @@ public final class ChzzkSettings {
     private static void playerPage(Sheet sheet) {
         LinearLayout content = page(sheet, "플레이어");
         toggle(content, "실시간 따라잡기 버튼", "live_catch_up", true);
-        label(content, "동심원 버튼을 누르면 플레이어가 제공하는 실시간 위치로 이동합니다.");
+        slider(content, "남길 버퍼", "live_catch_up_buffer_seconds", 1, 10, 3, "초");
+        label(content, "동심원 버튼으로 앞으로 이동할 때 남길 영상의 길이입니다. 값을 줄이면 더 최신 위치로 이동하지만 끊김이 늘 수 있습니다.");
         toggle(content, "클립 만들기 버튼 숨기기", "hide_clip_button", false);
         toggle(content, "크롬캐스트 버튼 숨기기", "hide_cast_button", false);
         toggle(content, "공유 버튼 숨기기", "hide_share_button", false);

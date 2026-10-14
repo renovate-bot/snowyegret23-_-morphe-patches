@@ -17,6 +17,11 @@
           },
           {
             "type": "feat",
+            "release": "patch"
+          },
+          {
+            "type": "feat",
+            "scope": "minor",
             "release": "minor"
           },
           {
