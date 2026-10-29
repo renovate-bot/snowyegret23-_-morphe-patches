@@ -12,6 +12,7 @@ import app.s.chzzk.common.utils.parameterTypeNames
 import app.s.chzzk.common.utils.rewrite
 import app.s.chzzk.common.utils.smaliReference
 import app.s.chzzk.shared.Constants.COMPATIBILITY_CHZZK
+import app.s.chzzk.shared.nativeKeyboxPatch
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
@@ -56,6 +57,7 @@ val chatCustomizationPatch = bytecodePatch(
         "device icons, chat input buttons, live viewer count, live rewind and catch-up, audio compression and volume boost, player button visibility, recent chat and settings copy/paste.",
 ) {
     compatibleWith(COMPATIBILITY_CHZZK)
+    dependsOn(nativeKeyboxPatch)
     extendWith("extensions/chzzk.mpe")
     dependsOn(playerResources)
 
