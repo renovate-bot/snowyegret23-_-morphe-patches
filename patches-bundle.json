@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-10-29T08:56:15",
-  "description": "## [1.4.4](https://github.com/snowyegret23/morphe-patches/compare/v1.4.3...v1.4.4) (2026-10-29)\n\n### ✨ New Features\n\n* support CHZZK 3.16.0 with chat, seeking and audio controls ([e795d4a](https://github.com/snowyegret23/morphe-patches/commit/e795d4a928328cae45103f526af7652af06a7c70)), closes [#7](https://github.com/snowyegret23/morphe-patches/issues/7) [#8](https://github.com/snowyegret23/morphe-patches/issues/8)",
-  "download_url": "https://github.com/snowyegret23/morphe-patches/releases/download/v1.4.4/patches-1.4.4.mpp",
+  "created_at": "2026-10-29T09:39:04",
+  "description": "## [1.4.5](https://github.com/snowyegret23/morphe-patches/compare/v1.4.4...v1.4.5) (2026-10-29)\n\n### 🐛 Bug Fixes\n\n* restore CHZZK 3.16.0 startup after APK signing ([737c35b](https://github.com/snowyegret23/morphe-patches/commit/737c35bdeff922b14551f533700d726992379c26))",
+  "download_url": "https://github.com/snowyegret23/morphe-patches/releases/download/v1.4.5/patches-1.4.5.mpp",
   "signature_download_url": "",
-  "version": "1.4.4"
+  "version": "1.4.5"
 }

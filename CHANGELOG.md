@@ -1,3 +1,9 @@
+## [1.4.5](https://github.com/snowyegret23/morphe-patches/compare/v1.4.4...v1.4.5) (2026-10-29)
+
+### 🐛 Bug Fixes
+
+* restore CHZZK 3.16.0 startup after APK signing ([737c35b](https://github.com/snowyegret23/morphe-patches/commit/737c35bdeff922b14551f533700d726992379c26))
+
 ## [1.4.4](https://github.com/snowyegret23/morphe-patches/compare/v1.4.3...v1.4.4) (2026-10-29)
 
 ### ✨ New Features
