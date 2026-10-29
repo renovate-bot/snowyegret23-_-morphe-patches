@@ -344,10 +344,11 @@ private fun BytecodePatchContext.addChatInputButtonHooks() {
         ))
         val body = if (kind == 2) {
             check(original.parameterTypeNames.first() == "Z" && words == 9 && composer == 6)
+            // Native visibility uses the second Compose change slot (0x70).
             """
                 invoke-static {p0}, $CHAT_UI->${hooks[kind]}(Z)Z
                 move-result p0
-                and-int/lit8 p7, p7, -0xf
+                and-int/lit8 p7, p7, -0x71
                 invoke-static/range {p0 .. p${words - 1}}, ${original.smaliReference}
                 return-void
             """

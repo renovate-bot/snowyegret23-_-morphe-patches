@@ -221,7 +221,25 @@ public final class ChatUi {
 
         int dp(float value) { return Math.round(value * getResources().getDisplayMetrics().density); }
 
+        @Override protected void onDetachedFromWindow() {
+            removeCallbacks(this);
+            if (handle == this) {
+                handle = null;
+                coordinates.clear();
+                dragPercent = -1;
+            }
+            super.onDetachedFromWindow();
+        }
+
+        @Override protected void onWindowVisibilityChanged(int visibility) {
+            super.onWindowVisibilityChanged(visibility);
+            removeCallbacks(this);
+            if (visibility == VISIBLE) post(this);
+        }
+
         @Override public void run() {
+            removeCallbacks(this);
+            if (!isAttachedToWindow() || getWindowVisibility() != VISIBLE) return;
             Object position = coordinates.get();
             float[] bounds = position == null ? null : chatBounds(position);
             View root = host.getWindow().getDecorView();
