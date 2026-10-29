@@ -1,3 +1,9 @@
+## [1.4.6](https://github.com/snowyegret23/morphe-patches/compare/v1.4.5...v1.4.6) (2026-10-29)
+
+### 🐛 Bug Fixes
+
+* refresh chat controls and prevent runtime library conflicts ([5b5ec02](https://github.com/snowyegret23/morphe-patches/commit/5b5ec02c7e9e48f5a988f3a11e24393e2261f5ef))
+
 ## [1.4.5](https://github.com/snowyegret23/morphe-patches/compare/v1.4.4...v1.4.5) (2026-10-29)
 
 ### 🐛 Bug Fixes
