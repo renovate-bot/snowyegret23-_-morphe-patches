@@ -35,13 +35,19 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 'lts/*'
-          cache: 'npm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          cache: true
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit dependencies
+        run: pnpm audit
 
       - name: Verify release notes
-        id: release_tooling
         run: |
           node --input-type=module <<'JS'
           import assert from 'node:assert/strict';
@@ -68,10 +74,6 @@ jobs:
           });
           for (const value of ['New Features', 'Bug Fixes', 'Updated App Support', 'Improvements', 'visible feature', 'visible fix', 'visible support', 'visible speed', 'compare/v0.0.1...v0.0.2']) assert.ok(notes.includes(value), value);
           for (const value of ['hidden build', 'hidden maintenance', '{{', 'Missing helper']) assert.ok(!notes.includes(value), value);
-          if (process.env.GITHUB_OUTPUT) {
-            const version = JSON.parse(fs.readFileSync('node_modules/semantic-release/package.json', 'utf8')).version;
-            fs.appendFileSync(process.env.GITHUB_OUTPUT, `semantic_version=${version}\n`);
-          }
           console.log('Release rules and release notes verified.');
           JS
 
@@ -81,10 +83,16 @@ jobs:
       # Semantic release runs its own Gradle build command.
       # Only dev and main branch will generate a release as specified by .releaserc
       - name: Release
-        uses: cycjimmy/semantic-release-action@v8.1.4
         id: release
-        with:
-          semantic_version: ${{ steps.release_tooling.outputs.semantic_version }}
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import semanticRelease from 'semantic-release';
+          const result = await semanticRelease();
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,
+            `new_release_published=${Boolean(result)}\n` +
+            `new_release_git_tag=${result ? result.nextRelease.gitTag : ''}\n`);
+          JS
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
