@@ -178,8 +178,9 @@ public final class ViewerCountOverlay extends View implements Runnable {
             ? (ChzzkSettings.enabledByDefault("viewer_count_label") ? "시청자 " : "") + numbers.format(next) + "명" : "";
         if (showTime && started > 0) {
             long seconds = Math.max(0, System.currentTimeMillis() - started) / 1000;
-            nextLabel += (nextLabel.isEmpty() ? "" : " · ") + String.format(Locale.KOREA,
-                    "방송 %02d:%02d:%02d", seconds / 3600, seconds / 60 % 60, seconds % 60);
+            nextLabel += (nextLabel.isEmpty() ? "" : " · ")
+                + (ChzzkSettings.enabledByDefault("viewer_broadcast_time_label") ? "방송 " : "")
+                + String.format(Locale.KOREA, "%02d:%02d:%02d", seconds / 3600, seconds / 60 % 60, seconds % 60);
         }
         if (!label.equals(nextLabel)) {
             label = nextLabel;

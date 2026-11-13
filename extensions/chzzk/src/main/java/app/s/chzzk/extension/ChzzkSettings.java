@@ -720,7 +720,7 @@ public final class ChzzkSettings {
             case "audio_compression": case "audio_boost":
             case "hide_cast_button": case "hide_share_button": case "viewer_count":
             case "avc_1080p_workaround": case "hide_startup_popups": case "viewer_broadcast_time":
-            case "viewer_count_label":
+            case "viewer_count_label": case "viewer_broadcast_time_label":
             case "player_info_background":
                 return true;
             default: return false;
@@ -1367,6 +1367,7 @@ public final class ChzzkSettings {
         toggle(content, "방송 화면에 시청자 수 표시", "viewer_count", true);
         toggle(content, "‘시청자’ 문구 표시", "viewer_count_label", true);
         toggle(content, "방송 진행 시간 표시", "viewer_broadcast_time", false);
+        toggle(content, "‘방송’ 문구 표시", "viewer_broadcast_time_label", true);
         label(content, "방송 시작 시각을 기준으로 시·분·초를 표시합니다. 시청자 수와 함께 켜면 나란히 표시됩니다.");
         label(content, "앱이 받는 시청자 수에 맞춰 자동 갱신됩니다. 보통 약 30초 간격입니다.");
         viewerPreview(content);
