@@ -8,6 +8,9 @@ internal fun BytecodePatchContext.chzzkType(type: String): String =
     if (packageMetadata.versionName == "3.18.0") mobile318Types[type] ?: type else type
 
 private val mobile318Types = mapOf(
+    "Lcom/navercorp/game/android/community/core/feature/feature/chat/ChatViewModel;" to "Lvt0;",
+    "Lcom/navercorp/game/android/community/core/feature/feature/chat/LiveChatScreenKt;" to "Lkx3;",
+    "Lcom/navercorp/game/android/community/ui/common/ui/chat/message/streaming/StreamingUserMessagesKt;" to "Lq89;",
     "Lcom/navercorp/game/android/community/core/feature/feature/popup/bottomsheet/BottomSheetModelBase\$DepthSelect;" to "Lrz;",
     "Lcom/navercorp/game/android/community/app/ui/home/channel/ChannelScreenKt;" to "Lrm0;",
     "Lcom/navercorp/game/android/community/app/ui/home/channel/ChannelViewModel;" to "Lvp0;",

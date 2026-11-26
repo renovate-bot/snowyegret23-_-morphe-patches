@@ -11,9 +11,12 @@ import app.s.chzzk.common.utils.parameterTypeNames
 import app.s.chzzk.common.utils.smaliReference
 import app.s.chzzk.shared.chzzkType
 import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethodImplementation
@@ -325,6 +328,142 @@ internal fun BytecodePatchContext.addChatUiHooks() {
         check-cast p$channel, Lkotlinx/collections/immutable/ImmutableList;
     """.trimIndent())
     addChatInputButtonHooks()
+    addStreamerHighlightHooks()
+    addChatNavigationHooks()
+}
+
+private fun BytecodePatchContext.addStreamerHighlightHooks() {
+    val builder = classDefBy(BUILDER)
+    val text = builder.fields.single { it.type == "Ljava/lang/StringBuilder;" }
+    uiBridge("textLength", 1, """
+        check-cast p0, $BUILDER
+        iget-object p0, p0, ${text.smaliReference}
+        invoke-virtual {p0}, Ljava/lang/StringBuilder;->length()I
+        move-result p0
+        return p0
+    """)
+    val constructor = classDefBy(SPAN).methods.single { it.name == "<init>" && it.parameterTypes.size == 15 }
+    val addStyle = builder.methods.single { it.parameterTypeNames == listOf(SPAN, "I", "I") && it.returnType == "V" }
+    uiBridge("highlightText", 23, """
+        new-instance v0, $SPAN
+        const-wide/16 v1, 0x0
+        const-wide/16 v3, 0x0
+        const/4 v5, 0x0
+        const/4 v6, 0x0
+        const/4 v7, 0x0
+        const/4 v8, 0x0
+        const/4 v9, 0x0
+        const-wide/16 v10, 0x0
+        const/4 v12, 0x0
+        const/4 v13, 0x0
+        const/4 v14, 0x0
+        const-wide v15, 0x4dffb45400000000L
+        const/16 v17, 0x0
+        const/16 v18, 0x0
+        const v19, 0xf7ff
+        invoke-direct/range {v0 .. v19}, ${constructor.smaliReference}
+        move-object/from16 v1, p0
+        check-cast v1, $BUILDER
+        move/from16 v2, p1
+        move/from16 v3, p2
+        invoke-virtual {v1, v0, v2, v3}, ${addStyle.smaliReference}
+        return-void
+    """)
+    for (name in listOf("StreamingUserMessageKt", "StreamingUserMessagesKt")) {
+        val owner = mutableClassDefBy(chzzkType("${COMMUNITY}ui/common/ui/chat/message/streaming/$name;"))
+        val calls = owner.methods.flatMap { method ->
+            method.implementation?.instructions?.withIndex()?.mapNotNull { (index, instruction) ->
+                val reference = instruction.getReference<MethodReference>()
+                if (reference?.definingClass == BUILDER && reference.parameterTypes.isEmpty() &&
+                    reference.returnType == "Landroidx/compose/ui/text/AnnotatedString;") {
+                    Triple(method, index, instruction)
+                } else null
+            } ?: emptyList()
+        }
+        val (method, index, instruction) = calls.single()
+        val register = when (instruction) {
+            is FiveRegisterInstruction -> instruction.registerC
+            is RegisterRangeInstruction -> instruction.startRegister
+            else -> error("Unsupported annotated chat builder call")
+        }
+        method.addInstructions(index,
+            "invoke-static/range {v$register .. v$register}, $CHAT_UI->finishMessage(Ljava/lang/Object;)V")
+    }
+}
+
+private fun BytecodePatchContext.addChatNavigationHooks() {
+    val stateType = "Landroidx/compose/foundation/lazy/LazyListState;"
+    val infoType = "Landroidx/compose/foundation/lazy/LazyListLayoutInfo;"
+    val modelType = chzzkType("${COMMUNITY}core/feature/feature/chat/ChatViewModel;")
+    val messageType = chzzkType("${COMMUNITY}data/core/entity/chat/message/BaseLiveChatMessage;")
+    val follow = classDefBy(modelType).methods.single {
+        it.parameterTypeNames == listOf(messageType, "Z") && it.returnType == "V"
+    }
+    val state = classDefBy(stateType)
+    val layout = state.methods.single { it.parameterTypes.isEmpty() && it.returnType == infoType }
+    val request = state.methods.singleOrNull {
+        AccessFlags.STATIC.isSet(it.accessFlags) && it.parameterTypeNames == listOf(stateType, "I") && it.returnType == "V"
+    }
+    val scroll = if (request != null) "invoke-static {p0, v1}, ${request.smaliReference}" else {
+        val reset = state.methods.single {
+            AccessFlags.STATIC.isSet(it.accessFlags) && it.parameterTypeNames == listOf(stateType) && it.returnType == "V"
+        }
+        val snap = state.methods.single { it.parameterTypeNames == listOf("I", "I", "Z") && it.returnType == "V" }
+        // Older builds inline the request's index to zero; retain its fling cancellation before setting the target.
+        """
+            invoke-static {p0}, ${reset.smaliReference}
+            invoke-virtual {p0, v1, v2, v2}, ${snap.smaliReference}
+        """
+    }
+    val measure = mutableClassDefBy("Landroidx/compose/foundation/lazy/LazyListMeasureResult;")
+    val orientation = "Landroidx/compose/foundation/gestures/Orientation;"
+    val constructor = measure.methods.single { it.name == "<init>" && orientation in it.parameterTypeNames }
+    val countIndex = constructor.parameterTypeNames.indexOf(orientation) - 2
+    check(constructor.parameterTypeNames.slice(countIndex..countIndex + 1) == listOf("I", "Z"))
+    val countRegister = constructor.localRegisterCount + constructor.parameterRegister(countIndex)
+    val countField = constructor.implementation!!.instructions.single {
+        it.opcode == Opcode.IPUT && (it as TwoRegisterInstruction).registerA == countRegister
+    }.getReference<FieldReference>()!!
+    val countGetter = measure.methods.single {
+        it.parameterTypes.isEmpty() && it.returnType == "I" && it.implementation!!.instructions.any { instruction ->
+            instruction.getReference<FieldReference>()?.smaliReference == countField.smaliReference
+        }
+    }
+    val count = classDefBy(infoType).methods.single { it.name == countGetter.name && it.parameterTypes.isEmpty() && it.returnType == "I" }
+    uiBridge("jumpChat", 6, """
+        if-eqz p0, :empty
+        if-eqz p1, :empty
+        check-cast p0, $stateType
+        check-cast p1, $modelType
+        invoke-virtual {p0}, ${layout.smaliReference}
+        move-result-object v0
+        invoke-interface {v0}, ${count.smaliReference}
+        move-result v0
+        if-lez v0, :empty
+        const/4 v1, 0x0
+        if-nez p2, :jump
+        add-int/lit8 v1, v0, -0x1
+        :jump
+        const/4 v2, 0x0
+        invoke-virtual {p1, v2, p2}, ${follow.smaliReference}
+        $scroll
+        const/4 v0, 0x1
+        return v0
+        :empty
+        const/4 v0, 0x0
+        return v0
+    """)
+    val screen = mutableClassDefBy(chzzkType("${COMMUNITY}core/feature/feature/chat/LiveChatScreenKt;")).methods.single {
+        it.returnType == "V" && modelType in it.parameterTypeNames && stateType in it.parameterTypeNames
+    }
+    check(screen.localRegisterCount >= 2)
+    val listRegister = screen.parameterRegister(screen.parameterTypeNames.indexOf(stateType))
+    val modelRegister = screen.parameterRegister(screen.parameterTypeNames.indexOf(modelType))
+    screen.addInstructions(0, """
+        move-object/from16 v0, p$listRegister
+        move-object/from16 v1, p$modelRegister
+        invoke-static {v0, v1}, $CHAT_UI->captureChat(Ljava/lang/Object;Ljava/lang/Object;)V
+    """.trimIndent())
 }
 
 private fun BytecodePatchContext.addChatInputButtonHooks() {

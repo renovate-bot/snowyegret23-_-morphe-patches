@@ -69,7 +69,7 @@ private fun BytecodePatchContext.bridge(name: String, body: String, registers: I
 val chatCustomizationPatch = bytecodePatch(
     name = "Chat customization",
     description = "Adds in-player Morphe settings, draggable chat width, chat styling, individual badge controls, " +
-        "device icons, chat input buttons, live viewer count, live rewind and catch-up, audio compression and volume boost, player button visibility, recent chat and settings copy/paste.",
+        "device icons, streamer highlighting, chat jump buttons, chat input buttons, live viewer count, live rewind and catch-up, audio compression and volume boost, player button visibility, recent chat and settings copy/paste.",
 ) {
     compatibleWith(COMPATIBILITY_CHZZK)
     dependsOn(nativeKeyboxPatch)
