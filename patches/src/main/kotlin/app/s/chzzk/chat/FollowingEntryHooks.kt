@@ -7,6 +7,7 @@ import app.s.chzzk.common.utils.getReference
 import app.s.chzzk.common.utils.localRegisterCount
 import app.s.chzzk.common.utils.parameterTypeNames
 import app.s.chzzk.common.utils.smaliReference
+import app.s.chzzk.shared.chzzkType
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
@@ -63,7 +64,7 @@ internal fun BytecodePatchContext.addFollowingEntryHooks() {
     addProfileFollowEntry()
     val candidates = mutableListOf<String>()
     classDefForEach { owner ->
-        if (owner.type.startsWith(FOLLOWING)) {
+        if (packageMetadata.versionName == "3.18.0" || owner.type.startsWith(FOLLOWING)) {
             owner.methods.filter { method ->
                 method.name == "invoke" && method.parameterTypeNames ==
                     List(3) { "Ljava/lang/Object;" } && method.implementation?.instructions?.let { instructions ->
@@ -71,7 +72,7 @@ internal fun BytecodePatchContext.addFollowingEntryHooks() {
                         it.opcode == Opcode.CHECK_CAST &&
                             it.getReference<TypeReference>()?.type == "Landroidx/compose/foundation/layout/ColumnScope;"
                     } && instructions.any {
-                        it.getReference<MethodReference>()?.definingClass == "${FOLLOWING}FollowingTabScreenKt;"
+                        it.getReference<MethodReference>()?.definingClass == chzzkType("${FOLLOWING}FollowingTabScreenKt;")
                     }
                 } == true
             }.forEach { candidates.add(owner.type) }
@@ -110,9 +111,9 @@ private fun Instruction.registers(): List<Int> = when (this) {
 }
 
 private fun BytecodePatchContext.addProfileFollowEntry() {
-    val channel = "Lcom/navercorp/game/android/community/data/core/entity/channel/StreamingChannelDetail;"
-    val model = "Lcom/navercorp/game/android/community/app/ui/home/channel/ChannelViewModel;"
-    val screen = mutableClassDefBy("Lcom/navercorp/game/android/community/app/ui/home/channel/ChannelScreenKt;")
+    val channel = chzzkType("Lcom/navercorp/game/android/community/data/core/entity/channel/StreamingChannelDetail;")
+    val model = chzzkType("Lcom/navercorp/game/android/community/app/ui/home/channel/ChannelViewModel;")
+    val screen = mutableClassDefBy(chzzkType("Lcom/navercorp/game/android/community/app/ui/home/channel/ChannelScreenKt;"))
         .methods.single {
             it.parameterTypeNames == listOf("Landroidx/compose/ui/Modifier;", model, COMPOSER, "I")
         }
@@ -183,7 +184,7 @@ private fun BytecodePatchContext.addProfileFollowEntry() {
     }
     val buttons = instructions.withIndex().filter {
         it.value.getReference<MethodReference>()?.let { ref ->
-            ref.definingClass == "Lcom/navercorp/game/android/community/ui/common/ui/channel/button/ChannelMotionButtonScreenKt;" &&
+            ref.definingClass == chzzkType("Lcom/navercorp/game/android/community/ui/common/ui/channel/button/ChannelMotionButtonScreenKt;") &&
                 ref.name == "a" && ref.parameterTypeNames.size == 9 && ref.parameterTypeNames[6] == COMPOSER
         } == true
     }

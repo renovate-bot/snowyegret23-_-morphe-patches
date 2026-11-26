@@ -8,6 +8,7 @@ import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.s.chzzk.common.utils.getReference
 import app.s.chzzk.common.utils.localRegisterCount
 import app.s.chzzk.common.utils.smaliReference
+import app.s.chzzk.shared.chzzkType
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
@@ -17,7 +18,7 @@ import com.android.tools.smali.dexlib2.immutable.ImmutableMethodImplementation
 private const val COMMUNITY = "Lcom/navercorp/game/android/community/"
 private const val PLAYER = "Lcom/naver/prismplayer/player/PrismPlayer;"
 private const val COMPOSER = "Landroidx/compose/runtime/Composer;"
-private const val BUTTONS = "${COMMUNITY}core/feature/feature/player/ui/LivePlayerButtonsKt;"
+private val BytecodePatchContext.BUTTONS get() = chzzkType("${COMMUNITY}core/feature/feature/player/ui/LivePlayerButtonsKt;")
 
 internal val playerResources = resourcePatch {
     execute {
@@ -41,17 +42,17 @@ internal val playerResources = resourcePatch {
 }
 
 internal fun BytecodePatchContext.addSeekHooks() {
-    val model = "${COMMUNITY}core/feature/feature/player/BasePlayerViewModel;"
+    val model = chzzkType("${COMMUNITY}core/feature/feature/player/BasePlayerViewModel;")
     val context = "Lcom/naver/prismplayer/ui/PrismUiContext;"
     val media = "Lcom/naver/prismplayer/Media;"
     for ((hook, position) in mapOf("seekToLive" to "catchUpPosition", "seekBack" to "rewindPosition")) {
         uiBridge(hook, 9, """
             if-eqz p0, :unavailable
             check-cast p0, $model
-            invoke-virtual {p0}, $model->${when (packageMetadata.versionName) { "1.3.0", "1.4.0" -> "y"; "3.17.0" -> "Q"; else -> "R" }}()$context
+            invoke-virtual {p0}, $model->${when (packageMetadata.versionName) { "1.3.0", "1.4.0" -> "y"; "3.18.0" -> "I"; "3.17.0" -> "Q"; else -> "R" }}()$context
             move-result-object v0
             if-eqz v0, :unavailable
-            invoke-virtual {v0}, $context->${if (packageMetadata.versionName in setOf("3.17.0", "1.4.0")) "y" else "w"}()$PLAYER
+            invoke-virtual {v0}, $context->${if (packageMetadata.versionName in setOf("3.17.0", "3.18.0", "1.4.0")) "y" else "w"}()$PLAYER
             move-result-object v0
             if-eqz v0, :unavailable
             invoke-interface {v0}, $PLAYER->isPlayingAd()Z
@@ -93,8 +94,8 @@ internal fun BytecodePatchContext.addSeekHooks() {
 
 internal fun BytecodePatchContext.addPlayerHooks() {
     addSeekHooks()
-    val semantic = classDefBy("${COMMUNITY}core/ui/ui/image/SemanticImageKt;").methods.single { it.name == "c" }
-    val modifierField = if (packageMetadata.versionName in setOf("3.16.0", "3.17.0")) "V" else "Z"
+    val semantic = classDefBy(chzzkType("${COMMUNITY}core/ui/ui/image/SemanticImageKt;")).methods.single { it.name == "c" }
+    val modifierField = if (packageMetadata.versionName in setOf("3.16.0", "3.17.0", "3.18.0")) "V" else "Z"
     for (rewind in listOf(true, false)) {
         val action = if (rewind) "Rewind" else "CatchUp"
         val prefix = if (rewind) "rewind" else "catchUp"
@@ -155,7 +156,7 @@ internal fun BytecodePatchContext.addPlayerHooks() {
     buttons.methods.add(controls)
     var added = 0
     classDefForEach { type ->
-        if (!type.type.startsWith("${COMMUNITY}app/ui/overlayplayerend/live/")) return@classDefForEach
+        if (packageMetadata.versionName != "3.18.0" && !type.type.startsWith("${COMMUNITY}app/ui/overlayplayerend/live/")) return@classDefForEach
         for (method in type.methods) {
             val calls = method.implementation?.instructions?.withIndex()?.filter {
                 it.value.getReference<MethodReference>()?.smaliReference == fullscreen.smaliReference
@@ -191,10 +192,10 @@ internal fun BytecodePatchContext.addPlayerHooks() {
 }
 
 private fun BytecodePatchContext.addPlayerMenuEntry() {
-    val image = "${COMMUNITY}core/feature/feature/popup/common/Selectable${'$'}Image;"
-    val depth = "${COMMUNITY}core/feature/feature/popup/bottomsheet/DepthItem;"
-    val parent = "${COMMUNITY}core/feature/feature/popup/bottomsheet/DepthParent;"
-    val current = packageMetadata.versionName in setOf("3.16.0", "3.17.0")
+    val image = chzzkType("${COMMUNITY}core/feature/feature/popup/common/Selectable${'$'}Image;")
+    val depth = chzzkType("${COMMUNITY}core/feature/feature/popup/bottomsheet/DepthItem;")
+    val parent = chzzkType("${COMMUNITY}core/feature/feature/popup/bottomsheet/DepthParent;")
+    val current = packageMetadata.versionName in setOf("3.16.0", "3.17.0", "3.18.0")
     val ctor = classDefBy(image).methods.single {
         it.name == "<init>" && it.parameterTypes.size == (if (current) 13 else 12) && it.parameterTypes[2] == "Ljava/lang/Integer;"
     }
@@ -232,11 +233,11 @@ private fun BytecodePatchContext.addPlayerMenuEntry() {
         invoke-interface {p0, v0, v1}, Ljava/util/List;->add(ILjava/lang/Object;)V
         return-void
     """)
-    val menuOwner = if (packageMetadata.versionName == "3.17.0") "Lz1;" else if (packageMetadata.versionName in listOf("3.15.0", "3.15.2", "3.16.0")) "Lt1;" else "Lq1;"
-    val menu = mutableClassDefBy(menuOwner).methods.single { it.name == if (packageMetadata.versionName == "3.17.0") "a" else "invoke" }
+    val menuOwner = if (packageMetadata.versionName == "3.18.0") "La4;" else if (packageMetadata.versionName == "3.17.0") "Lz1;" else if (packageMetadata.versionName in listOf("3.15.0", "3.15.2", "3.16.0")) "Lt1;" else "Lq1;"
+    val menu = mutableClassDefBy(menuOwner).methods.single { it.name == if (packageMetadata.versionName in setOf("3.17.0", "3.18.0")) "a" else "invoke" }
     val call = menu.implementation!!.instructions.withIndex().single {
         it.value.getReference<MethodReference>()?.let { ref ->
-            ref.name == "<init>" && ref.definingClass == "${COMMUNITY}core/feature/feature/popup/bottomsheet/BottomSheetModelBase${'$'}DepthSelect;"
+            ref.name == "<init>" && ref.definingClass == chzzkType("${COMMUNITY}core/feature/feature/popup/bottomsheet/BottomSheetModelBase${'$'}DepthSelect;")
         } == true
     }
     val list = (call.value as FiveRegisterInstruction).registerD

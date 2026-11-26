@@ -244,9 +244,11 @@ public final class ChzzkSettings {
         return (value & 0xffffffff00000000L) | (Float.floatToRawIntBits(scaled) & 0xffffffffL);
     }
 
+    public static String headerKind(Object item) { return item.getClass().getSimpleName(); }
+
     public static boolean hideHeader(Object item) {
         if (item == null) return false;
-        switch (item.getClass().getSimpleName()) {
+        switch (headerKind(item)) {
             case "DonationRank": return enabled("hide_donation_rank");
             case "TongPowRank": return enabled("hide_tongpow_rank");
             case "TongPowPrediction": return enabled("hide_prediction_panel");
@@ -292,6 +294,17 @@ public final class ChzzkSettings {
             }
         }
         return false;
+    }
+
+    public static List<?> filterMessages(List<?> messages) {
+        ArrayList<Object> filtered = null;
+        for (int i = 0; i < messages.size(); i++) {
+            Object message = messages.get(i);
+            if (hideMessage(message)) {
+                if (filtered == null) filtered = new ArrayList<>(messages.subList(0, i));
+            } else if (filtered != null) filtered.add(message);
+        }
+        return filtered == null ? messages : filtered;
     }
 
     public static String decorateMessage(String original, Object message) {
