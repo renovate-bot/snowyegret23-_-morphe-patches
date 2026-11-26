@@ -1,3 +1,20 @@
+## [1.5.1](https://github.com/snowyegret23/morphe-patches/compare/v1.5.0...v1.5.1) (2026-11-26)
+
+### 🐛 Bug Fixes
+
+* disable streamer highlights and chat navigation by default ([49b887e](https://github.com/snowyegret23/morphe-patches/commit/49b887e83f9178ecbe9999e71d999ee5b7084005))
+* preserve exception handlers when removing playback ads ([f79104f](https://github.com/snowyegret23/morphe-patches/commit/f79104f2468076027c9f060cfdd046174f8e6f59))
+* restore complete CHZZK 3.18.0 mobile patch support ([7c6cfde](https://github.com/snowyegret23/morphe-patches/commit/7c6cfde6be05b8d57f8c809d1aedd33dc35ccb00))
+* restore startup on CHZZK 3.18.0 and TV 1.5.0 ([c377fad](https://github.com/snowyegret23/morphe-patches/commit/c377fad4f3c9723a89119e570fbe6b25798d5065))
+
+### ✨ New Features
+
+* add streamer chat highlighting and chat navigation ([771af36](https://github.com/snowyegret23/morphe-patches/commit/771af366626b6bc3a2f1866bac31380cdb2d8203))
+
+### 🚀 Updated App Support
+
+* support all patches on CHZZK for Android TV 1.5.0 ([4fe32b2](https://github.com/snowyegret23/morphe-patches/commit/4fe32b2f75256db1d39f7df78ad74155eb689a1e))
+
 ## [1.5.0](https://github.com/snowyegret23/morphe-patches/compare/v1.4.10...v1.5.0) (2026-11-23)
 
 ### ✨ New Features
