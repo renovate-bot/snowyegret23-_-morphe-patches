@@ -75,9 +75,9 @@ internal fun BytecodePatchContext.addViewerCountHooks() {
     """)
 
     // The live item can be cached; the status in this collector is refreshed every 30 seconds.
-    val app = if (packageMetadata.versionName in setOf("1.3.0", "1.4.0")) "tv" else "app"
+    val app = if (packageMetadata.versionName in setOf("1.3.0", "1.4.0", "1.5.0")) "tv" else "app"
     val minified = packageMetadata.versionName == "3.18.0"
-    val collector = mutableClassDefBy(if (minified) "Ly00;" else "${COMMUNITY}$app/ui/overlayplayerend/live/streaming/StreamingLiveEndViewModel${'$'}loadDataIntervalPer30Sec${'$'}8;")
+    val collector = mutableClassDefBy(if (minified) "Ly00;" else if (packageMetadata.versionName == "1.5.0") "Lh60;" else "${COMMUNITY}$app/ui/overlayplayerend/live/streaming/StreamingLiveEndViewModel${'$'}loadDataIntervalPer30Sec${'$'}8;")
         .methods.single { it.name == "invokeSuspend" }
     val casts = collector.implementation!!.instructions.withIndex().filter { it.value.opcode == Opcode.CHECK_CAST }
     // In 3.18 the Triple collector is one branch of a merged coroutine.
@@ -100,7 +100,7 @@ internal fun BytecodePatchContext.addViewerCountHooks() {
     val view = mutableClassDefBy(viewType)
     val modelGetter = view.methods.single { it.name == "getViewModel" && it.returnType == modelType }
     val playableField = when (packageMetadata.versionName) {
-        "1.3.0", "1.4.0" -> "j0"
+        "1.3.0", "1.4.0", "1.5.0" -> "j0"
         "3.16.0", "3.17.0", "3.18.0" -> "k0"
         else -> "o0"
     }

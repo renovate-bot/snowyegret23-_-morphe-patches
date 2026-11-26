@@ -46,9 +46,9 @@ internal fun BytecodePatchContext.addPlayerDiagnosticsHooks() {
     }
 
     val player = classDefBy(NATIVE_PLAYER)
-    if (packageMetadata.versionName == "3.18.0") {
+    if (packageMetadata.versionName in setOf("3.18.0", "1.5.0")) {
         bridge("isOverlayPlayer", 2, """
-            instance-of v0, p0, Lp06;
+            instance-of v0, p0, ${if (packageMetadata.versionName == "1.5.0") "Lvi1;" else "Lp06;"}
             return v0
         """)
     }

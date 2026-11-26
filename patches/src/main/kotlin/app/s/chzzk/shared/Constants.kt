@@ -5,7 +5,7 @@ import app.morphe.patcher.patch.AppTarget
 import app.morphe.patcher.patch.Compatibility
 
 object Constants {
-    internal val CHZZK_TV_VERSIONS = setOf("1.4.0", "1.3.0")
+    internal val CHZZK_TV_VERSIONS = setOf("1.5.0", "1.4.0", "1.3.0")
 
     val COMPATIBILITY_CHZZK_MOBILE = Compatibility(
         name = "Chzzk",

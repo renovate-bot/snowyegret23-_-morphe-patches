@@ -2,10 +2,14 @@ package app.s.chzzk.shared
 
 import app.morphe.patcher.patch.BytecodePatchContext
 
-// CHZZK 3.18.0 minifies application classes, including model and Compose owners.
+// CHZZK 3.18.0 and TV 1.5.0 minify application classes, including model and Compose owners.
 // Keep the names used by earlier releases at call sites; each hook validates its member contract.
 internal fun BytecodePatchContext.chzzkType(type: String): String =
-    if (packageMetadata.versionName == "3.18.0") mobile318Types[type] ?: type else type
+    when (packageMetadata.versionName) {
+        "3.18.0" -> mobile318Types[type] ?: type
+        "1.5.0" -> tv150Types[type] ?: type
+        else -> type
+    }
 
 private val mobile318Types = mapOf(
     "Lcom/navercorp/game/android/community/core/feature/feature/chat/ChatViewModel;" to "Lvt0;",
@@ -64,4 +68,65 @@ private val mobile318Types = mapOf(
     "Lcom/navercorp/game/android/community/core/ui/ui/text/util/InlineTextContentBox\$Companion;" to "Lwq3;",
     "Lcom/navercorp/game/android/community/data/core/entity/user/streaming/StreamingProperty\$Subscription;" to "Lk19;",
     "Lcom/navercorp/game/android/community/data/core/entity/user/streaming/StreamingProperty\$DonationRanking;" to "Lh19;",
+)
+
+private val tv150Types = mapOf(
+    "Lcom/navercorp/game/android/community/tv/ui/home/NavTopLevelFollowingComposable;" to "Li11;",
+    "Lcom/navercorp/game/android/community/data/core/entity/serviceplayable/StreamingLiveStatus\$LiveStatus;" to "Lar2;",
+    "Lcom/navercorp/game/android/community/core/feature/feature/overlayplayer/data/OverlayPlayerData\$Data\$Companion;" to "Lgh2;",
+    "Lcom/navercorp/game/android/community/core/base/entity/VerifiedMarkType;" to "Lk73;",
+    "Lcom/navercorp/game/android/community/core/feature/feature/chat/ChatViewModel;" to "Ldl;",
+    "Lcom/navercorp/game/android/community/core/feature/feature/chat/LiveChatScreenKt;" to "Lfo0;",
+    "Lcom/navercorp/game/android/community/core/feature/feature/overlayplayer/component/OverlayPlayerViewModelBase;" to "Ljk1;",
+    "Lcom/navercorp/game/android/community/core/feature/feature/overlayplayer/data/OverlayPlayerData\$Data;" to "Lse1;",
+    "Lcom/navercorp/game/android/community/core/feature/feature/player/BasePlayerView;" to "Ldc;",
+    "Lcom/navercorp/game/android/community/core/feature/feature/player/BasePlayerViewModel;" to "Lhc;",
+    "Lcom/navercorp/game/android/community/core/feature/feature/popup/bottomsheet/DepthItem;" to "Lqx;",
+    "Lcom/navercorp/game/android/community/core/feature/feature/popup/bottomsheet/DepthParent;" to "Lrx;",
+    "Lcom/navercorp/game/android/community/core/feature/feature/popup/common/Selectable\$Image;" to "Ly52;",
+    "Lcom/navercorp/game/android/community/core/feature/util/account/AccountUtils;" to "Lc0;",
+    "Lcom/navercorp/game/android/community/core/foundation/util/animation/AnimationV2Kt;" to "Lj4;",
+    "Lcom/navercorp/game/android/community/core/ui/ui/image/SemanticImageKt;" to "Lo82;",
+    "Lcom/navercorp/game/android/community/core/ui/ui/text/util/InlineTextContentBox\$Companion;" to "Lii0;",
+    "Lcom/navercorp/game/android/community/core/ui/ui/text/util/InlineTextContentBox;" to "Lki0;",
+    "Lcom/navercorp/game/android/community/core/ui/ui/text/util/InlineTextContentIconBox;" to "Lli0;",
+    "Lcom/navercorp/game/android/community/core/ui/util/animation/LayoutAnim\$Rect;" to "Lyk0;",
+    "Lcom/navercorp/game/android/community/data/core/cache/current/CurrentUser;" to "Ldi;",
+    "Lcom/navercorp/game/android/community/data/core/entity/channel/ChannelPersonalData;" to "Lyi;",
+    "Lcom/navercorp/game/android/community/data/core/entity/channel/FollowingInfo;" to "Lja0;",
+    "Lcom/navercorp/game/android/community/data/core/entity/channel/StreamingChannelDetail;" to "Lni2;",
+    "Lcom/navercorp/game/android/community/data/core/entity/channel/StreamingChannelPersonal;" to "Lxi2;",
+    "Lcom/navercorp/game/android/community/data/core/entity/channel/StreamingFollowingChannel;" to "Ljn2;",
+    "Lcom/navercorp/game/android/community/data/core/entity/channel/StreamingMicroChannel;" to "Lbs2;",
+    "Lcom/navercorp/game/android/community/data/core/entity/channel/StreamingMicroChannelIF;" to "Lcs2;",
+    "Lcom/navercorp/game/android/community/data/core/entity/channel/StreamingMicroChannelPersonal;" to "Lfs2;",
+    "Lcom/navercorp/game/android/community/data/core/entity/chat/extra/StreamingChatMessageExtra;" to "Llk2;",
+    "Lcom/navercorp/game/android/community/data/core/entity/chat/message/BaseLiveChatMessage;" to "Ljb;",
+    "Lcom/navercorp/game/android/community/data/core/entity/player/StreamingLivePlayableData;" to "Loq2;",
+    "Lcom/navercorp/game/android/community/data/core/entity/serviceplayable/StreamingLiveItem;" to "Llq2;",
+    "Lcom/navercorp/game/android/community/data/core/entity/serviceplayable/StreamingLiveStatus;" to "Lbr2;",
+    "Lcom/navercorp/game/android/community/data/core/entity/user/streaming/StreamingProperty\$DonationRanking;" to "Lst2;",
+    "Lcom/navercorp/game/android/community/data/core/entity/user/streaming/StreamingProperty\$Subscription;" to "Lvt2;",
+    "Lcom/navercorp/game/android/community/data/core/entity/user/streaming/StreamingUserRole;" to "Ltu2;",
+    "Lcom/navercorp/game/android/community/data/core/entity/user/streaming/StreamingUserStatus;" to "Lyu2;",
+    "Lcom/navercorp/game/android/community/data/tv/entity/TvFollowingChannelList;" to "Lf23;",
+    "Lcom/navercorp/game/android/community/tv/component/activity/OverlayPlayerActivity;" to "Lge1;",
+    "Lcom/navercorp/game/android/community/tv/component/activity/OverlayPlayerViewModel;" to "Lak1;",
+    "Lcom/navercorp/game/android/community/tv/feature/navigation/NavComposableWithMainTopLevel;" to "Llz0;",
+    "Lcom/navercorp/game/android/community/tv/feature/overlayplayer/OverlayPlayerView;" to "Lvi1;",
+    "Lcom/navercorp/game/android/community/tv/ui/TvScreenKt;" to "Lq43;",
+    "Lcom/navercorp/game/android/community/tv/ui/component/GNBMenuItemKt;" to "Lyb0;",
+    "Lcom/navercorp/game/android/community/tv/ui/component/SettingButtonKt;" to "Lgc2;",
+    "Lcom/navercorp/game/android/community/tv/ui/overlayplayerend/live/streaming/StreamingLiveEndScreenKt;" to "Lmp2;",
+    "Lcom/navercorp/game/android/community/tv/ui/setting/SettingMenu;" to "Lhc2;",
+    "Lcom/navercorp/game/android/community/tv/ui/setting/SettingScreenKt;" to "Loc2;",
+    "Lcom/navercorp/game/android/community/ui/common/ui/chat/message/streaming/StreamingUserMessageKt;" to "Lqu2;",
+    "Lcom/navercorp/game/android/community/ui/common/ui/chat/message/streaming/StreamingUserMessagesKt;" to "Lru2;",
+    "Lcom/navercorp/game/android/community/ui/common/ui/chat/message/streaming/designstyle/StreamingMessageDesignStyle\$ChatStyleInfo;" to "Lgr2;",
+    "Lcom/navercorp/game/android/community/ui/common/ui/chat/message/streaming/designstyle/StreamingMessageDesignStyle\$NicknameStyleInfo;" to "Lnr2;",
+    "Lcom/navercorp/game/android/community/ui/common/ui/chat/message/streaming/designstyle/StreamingMessageDesignStyleKt;" to "Lio2;",
+    "Lcom/navercorp/game/android/community/ui/common/ui/chat/message/streaming/entity/StreamingChatMessage;" to "Lcj2;",
+    "Lcom/navercorp/game/android/community/ui/common/ui/chat/message/streaming/entity/StreamingChatMessageType;" to "Lnk2;",
+    "Lcom/navercorp/game/android/community/ui/common/ui/chat/message/streaming/util/StreamingNicknameKt;" to "Lzs2;",
+    "Lcom/navercorp/game/android/community/ui/common/ui/overlayplayerend/live/streaming/StreamingLiveDetail;" to "Lzn2;",
 )

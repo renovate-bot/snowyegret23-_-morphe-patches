@@ -16,8 +16,8 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethodImplementation
@@ -57,7 +57,7 @@ internal fun BytecodePatchContext.addFollowingEntryHooks() {
     """.trimIndent())
     settings.methods.remove(original)
     settings.methods.add(render)
-    if (packageMetadata.versionName in setOf("1.3.0", "1.4.0")) {
+    if (packageMetadata.versionName in setOf("1.3.0", "1.4.0", "1.5.0")) {
         addTvFollowingEntry()
         return
     }
@@ -199,8 +199,8 @@ private fun BytecodePatchContext.addProfileFollowEntry() {
 }
 
 private fun BytecodePatchContext.addTvFollowingEntry() {
-    val owner = mutableClassDefBy("Lcom/navercorp/game/android/community/tv/ui/TvScreenKt;")
-    val nav = "Lcom/navercorp/game/android/community/tv/feature/navigation/NavComposableWithMainTopLevel;"
+    val owner = mutableClassDefBy(chzzkType("Lcom/navercorp/game/android/community/tv/ui/TvScreenKt;"))
+    val nav = chzzkType("Lcom/navercorp/game/android/community/tv/feature/navigation/NavComposableWithMainTopLevel;")
     val method = owner.methods.single {
         it.returnType == "V" && it.parameterTypeNames ==
             listOf("Landroidx/tv/material3/NavigationDrawerScope;", "Landroidx/compose/ui/Modifier;", nav,
@@ -209,7 +209,7 @@ private fun BytecodePatchContext.addTvFollowingEntry() {
     val instructions = method.implementation!!.instructions
     val call = instructions.withIndex().single {
         it.value.getReference<MethodReference>()?.let { ref ->
-            ref.definingClass == "Lcom/navercorp/game/android/community/tv/ui/component/GNBMenuItemKt;" &&
+            ref.definingClass == chzzkType("Lcom/navercorp/game/android/community/tv/ui/component/GNBMenuItemKt;") &&
                 ref.parameterTypeNames.size == 10 && ref.parameterTypeNames[8] == COMPOSER
         } == true
     }.index
@@ -228,7 +228,7 @@ private fun BytecodePatchContext.addTvFollowingEntry() {
         ImmutableMethodImplementation(3, emptyList(), emptyList(), emptyList())
     ))
     bridge.addInstructions(0, """
-        instance-of v0, p1, Lcom/navercorp/game/android/community/tv/ui/home/NavTopLevelFollowingComposable;
+        instance-of v0, p1, ${chzzkType("Lcom/navercorp/game/android/community/tv/ui/home/NavTopLevelFollowingComposable;")}
         if-eqz v0, :done
         invoke-static/range {p0 .. p0}, $SETTINGS->renderFollowingEntry(Ljava/lang/Object;)V
         :done

@@ -13,8 +13,8 @@ import app.s.chzzk.common.utils.rewrite
 import app.s.chzzk.common.utils.smaliReference
 import app.s.chzzk.shared.Constants.CHZZK_TV_VERSIONS
 import app.s.chzzk.shared.Constants.COMPATIBILITY_CHZZK
-import app.s.chzzk.shared.nativeKeyboxPatch
 import app.s.chzzk.shared.chzzkType
+import app.s.chzzk.shared.nativeKeyboxPatch
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
@@ -388,10 +388,13 @@ val chatCustomizationPatch = bytecodePatch(
     }
 }
 
-private fun BytecodePatchContext.addGroupedMessageFilter(): MutableMethod {
+internal fun BytecodePatchContext.addGroupedMessageFilter(
+    groupType: String = "Ljx3;",
+    rendererType: String = "Lq89;",
+): MutableMethod {
     // The grouped renderer receives LiveChatMessages, so individual message guards
     // never run. Filter a render-only copy, keeping the app's source list intact.
-    val group = mutableClassDefBy("Ljx3;")
+    val group = mutableClassDefBy(groupType)
     val messages = group.fields.single { it.name == "messages" && it.type == "Ljava/util/List;" }
     val index = group.fields.single { it.name == "groupIndex" && it.type == "J" }
     val constructor = group.methods.single {
@@ -420,7 +423,7 @@ private fun BytecodePatchContext.addGroupedMessageFilter(): MutableMethod {
         return-object v0
     """.trimIndent())
     group.methods.add(helper)
-    val renderer = mutableClassDefBy("Lq89;").methods.single {
+    val renderer = mutableClassDefBy(rendererType).methods.single {
         it.returnType == "V" && group.type in it.parameterTypeNames && "Landroidx/compose/runtime/Composer;" in it.parameterTypeNames
     }
     val parameter = renderer.parameterRegister(renderer.parameterTypeNames.indexOf(group.type))

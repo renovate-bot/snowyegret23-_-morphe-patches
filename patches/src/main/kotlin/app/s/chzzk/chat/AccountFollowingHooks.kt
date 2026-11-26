@@ -40,7 +40,7 @@ internal fun BytecodePatchContext.addAccountFollowingHooks() {
             } == true
     }
 
-    if (packageMetadata.versionName == "3.18.0") {
+    if (packageMetadata.versionName in setOf("3.18.0", "1.5.0")) {
         val manager = "Lcom/navercorp/nid/login/NidLoginManager;"
         val instance = classDefBy(manager).fields.single { it.name == "INSTANCE" && it.type == manager }
         val loggedIn = classDefBy(manager).methods.single { it.name == "isLoggedIn" && it.parameterTypes.isEmpty() && it.returnType == "Z" }
@@ -51,7 +51,7 @@ internal fun BytecodePatchContext.addAccountFollowingHooks() {
             return v0
         """)
     } else {
-        val account = classDefBy("${ACCOUNT_COMMUNITY}core/base/delegate/AccountManagerDelegate${'$'}Companion;")
+        val account = classDefBy(chzzkType("${ACCOUNT_COMMUNITY}core/base/delegate/AccountManagerDelegate${'$'}Companion;"))
             .methods.single { it.parameterTypes.isEmpty() && it.returnType == "Z" && AccessFlags.STATIC.isSet(it.accessFlags) }
         bridge("isLoggedIn", 1, """
             invoke-static {}, ${account.smaliReference}
@@ -60,7 +60,7 @@ internal fun BytecodePatchContext.addAccountFollowingHooks() {
         """)
     }
     val currentUser = classDefBy(chzzkType("${ACCOUNT_COMMUNITY}data/core/cache/current/CurrentUser;"))
-        .methods.single { it.name == (if (packageMetadata.versionName == "3.18.0") "C" else "a") && it.parameterTypes.isEmpty() && it.returnType == "Ljava/lang/String;" }
+        .methods.single { it.name == (when (packageMetadata.versionName) { "3.18.0" -> "C"; "1.5.0" -> "E"; else -> "a" }) && it.parameterTypes.isEmpty() && it.returnType == "Ljava/lang/String;" }
     bridge("currentAccount", 1, """
         invoke-static {}, ${currentUser.smaliReference}
         move-result-object v0
@@ -119,8 +119,8 @@ internal fun BytecodePatchContext.addAccountFollowingHooks() {
         return-object v0
     """)
 
-    val listType = if (packageMetadata.versionName in setOf("1.3.0", "1.4.0")) {
-        "${ACCOUNT_COMMUNITY}data/tv/entity/TvFollowingChannelList;"
+    val listType = if (packageMetadata.versionName in setOf("1.3.0", "1.4.0", "1.5.0")) {
+        chzzkType("${ACCOUNT_COMMUNITY}data/tv/entity/TvFollowingChannelList;")
     } else {
         chzzkType("${ACCOUNT_COMMUNITY}data/mobile/entity/following/FollowingChannelList;")
     }

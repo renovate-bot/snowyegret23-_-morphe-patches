@@ -90,6 +90,8 @@ public final class ChatUi {
         if (end > start) highlightText(builder, start, end);
     }
 
+    public static int deviceIcon(int kind) { return icon("s_chzzk_device_" + (kind == 1 ? "pc" : kind == 3 ? "ios" : "phone")); }
+
     public static int catchUpIcon() { return icon("s_chzzk_live_catchup"); }
     public static int rewindIcon() { return icon("s_chzzk_live_rewind"); }
 
