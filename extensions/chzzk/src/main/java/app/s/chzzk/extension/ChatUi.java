@@ -109,7 +109,7 @@ public final class ChatUi {
     public static void appendHeader(Object builder, Object message, Object style, Object density, Map<?, ?> inline) {
         finishMessage(builder);
         if (!"USER".equals(ChzzkSettings.messageKind(message))) return;
-        if (ChzzkSettings.enabledByDefault("highlight_streamer")) {
+        if (ChzzkSettings.enabled("highlight_streamer")) {
             String role = ChzzkSettings.messageRole(message);
             if ("STREAMER".equals(role) || "STREAMING_CHANNEL_OWNER".equals(role)) {
                 synchronized (highlights) { highlights.put(builder, textLength(builder)); }
@@ -291,7 +291,7 @@ public final class ChatUi {
 
         void update(float[] bounds, int[] origin) {
             boolean visible = bounds != null && chatList.get() != null && chatModel.get() != null
-                && ChzzkSettings.enabledByDefault("chat_jump_buttons")
+                && ChzzkSettings.enabled("chat_jump_buttons")
                 && bounds[2] - bounds[0] >= dp(72) && bounds[3] - bounds[1] >= dp(224)
                 && !host.isFinishing() && !host.isDestroyed();
             setVisibility(visible ? VISIBLE : GONE);

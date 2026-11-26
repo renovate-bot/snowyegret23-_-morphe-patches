@@ -1227,9 +1227,9 @@ public final class ChzzkSettings {
         if (!TvSettings.active) {
             toggle(content, "드래그로 채팅 폭 조절", "drag_chat_width", true);
             label(content, "영상과 채팅 사이 손잡이를 좌우로 움직이세요. 가볍게 누르면 폭과 글자 크기를 바로 조절할 수 있습니다.");
-            toggle(content, "스트리머 채팅 강조", "highlight_streamer", true);
+            toggle(content, "스트리머 채팅 강조", "highlight_streamer", false);
             label(content, "현재 방송의 스트리머가 쓴 채팅에 배경색을 표시합니다.");
-            toggle(content, "채팅 맨 위·맨 아래 버튼", "chat_jump_buttons", true);
+            toggle(content, "채팅 맨 위·맨 아래 버튼", "chat_jump_buttons", false);
             label(content, "맨 위는 현재 남아 있는 가장 오래된 채팅으로, 맨 아래는 최신 채팅으로 이동합니다.");
         }
         slider(content, "채팅 폭", "chat_width_scale", 50, 300, 100, "%");
