@@ -7,6 +7,17 @@ private data class KeyboxLibrary(val sha256: String, val offset: Int, val return
 
 internal val nativeKeyboxPatch = resourcePatch {
     execute {
+        if (packageMetadata.packageName == Constants.COMPATIBILITY_CHZZK.packageName) {
+            val supportedVersion = when (packageMetadata.versionName to packageMetadata.versionCode) {
+                "3.18.0" to "263" -> "3.17.0"
+                "1.5.0" to "100017" -> "1.4.0"
+                else -> null
+            }
+            check(supportedVersion == null) {
+                "CHZZK ${packageMetadata.versionName} exits during startup after re-signing (Empty key). " +
+                    "Use CHZZK $supportedVersion with this bundle."
+            }
+        }
         if (packageMetadata.versionName !in setOf("3.16.0", "3.17.0", "1.3.0", "1.4.0")) return@execute
         val libraries = mapOf(
             "arm64-v8a" to KeyboxLibrary(

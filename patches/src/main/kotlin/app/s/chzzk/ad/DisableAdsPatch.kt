@@ -30,7 +30,7 @@ val disableAdsPatch = bytecodePatch(
                 it.returnType == "V" && it.parameterTypeNames == listOf(
                     "Lcom/navercorp/game/android/community/core/feature/feature/player/data/LivePlayerData\$Event\$AD;"
                 )
-            }.rewrite("return-void")
+            }.addInstructions(0, "return-void")
         val cardType = classDefBy("Lcom/navercorp/shortform/sdk/data/dto/CreatorHubCard;").methods.single {
             it.name == "getCardType" && it.returnType == "Ljava/lang/String;" && it.parameterTypes.isEmpty()
         }
